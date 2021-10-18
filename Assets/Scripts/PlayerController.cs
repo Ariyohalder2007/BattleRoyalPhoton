@@ -1,17 +1,39 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Photon.Pun;
+using Photon.Realtime;
 using UnityEngine;
 
-public class PlayerController : MonoBehaviour
+public class PlayerController : MonoBehaviourPun
 {
+    [Header("Info")] 
+    public int id;
     [Header("Stats")] 
     public float moveSpeed;
     public float jumpForce;
     [Header("Components")] 
     public Rigidbody rig;
 
+   public Player photonPlayer;
 
+    [PunRPC]
+    public void Initialize(Player player)
+    {
+        id = player.ActorNumber;
+        photonPlayer = player;
+        GameManager.Instance.players[id - 1] = this;
+        
+        //If not our then
+        if (!photonView.IsMine)
+        {
+            GetComponentInChildren<Camera>().gameObject.SetActive(false);
+            rig.isKinematic = true;
+        }
+    }
+    
+    
+    
     private void Update()
     {
         Move();
