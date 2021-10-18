@@ -9,12 +9,21 @@ public class PlayerController : MonoBehaviourPun
 {
     [Header("Info")] 
     public int id;
+    private int curAttackerId;
     [Header("Stats")] 
     public float moveSpeed;
     public float jumpForce;
+    public int curHp;
+    public int maxHp;
+    public int kills;
+    public bool dead;
+
+    private bool flashingDamage;
     [Header("Components")] 
     public Rigidbody rig;
 
+    public PlayerWeapon weapon;
+    public MeshRenderer mr;
    public Player photonPlayer;
 
     [PunRPC]
@@ -36,11 +45,22 @@ public class PlayerController : MonoBehaviourPun
     
     private void Update()
     {
+        if (!photonView.IsMine || dead)
+        {
+            return;
+            
+        }
+        
         Move();
 
         if (Input.GetKeyDown(KeyCode.Space))
         {
             TryJump();
+        }
+
+        if (Input.GetButtonDown("Fire1"))
+        {
+            weapon.TryShoot();
         }
     }
 
@@ -66,6 +86,47 @@ public class PlayerController : MonoBehaviourPun
         if (Physics.Raycast(ray, 1.5f))
         {
             rig.AddForce(Vector3.up*jumpForce, ForceMode.Impulse);
+        }
+    }
+    
+    [PunRPC]
+    public void TakeDamage(int attackerId, int damage)
+    {
+        if (dead) return;
+        curHp -= damage;
+        curAttackerId = attackerId;
+        //Flash the player RED
+        photonView.RPC("DamageFlash", RpcTarget.Others);
+        
+        
+        //Update the player UI
+        
+        
+        //DIE if health == 0
+
+        if (curHp<=0)
+        {
+            photonView.RPC("Die", RpcTarget.All);
+        }
+    }
+    [PunRPC]
+    public void Die(){}
+
+    [PunRPC]
+    public void DamageFlash()
+    {
+        if (flashingDamage) return;
+        StartCoroutine(DamageFlashCoRoutine());
+
+
+        IEnumerator DamageFlashCoRoutine()
+        {
+            flashingDamage = true;
+            Color defColor = mr.material.color;
+            mr.material.color=Color.red;
+            yield return new WaitForSeconds(.5f);
+            mr.material.color = defColor;
+            flashingDamage = false;
         }
     }
 
