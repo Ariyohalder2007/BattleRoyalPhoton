@@ -67,4 +67,12 @@ public class CameraController : MonoBehaviour
       }
       
    }
+
+
+   public void SetAsSpectator()
+   {
+      _isSpectator = true;
+      transform.parent = null;
+      
+   }
 }

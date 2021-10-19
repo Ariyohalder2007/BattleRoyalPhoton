@@ -8,6 +8,7 @@ using Random = UnityEngine.Random;
 
 public class GameManager : MonoBehaviourPun
 {
+   public float postGameTime;
    [Header("Player")] 
    public string playerPrefabLocation;
 
@@ -60,5 +61,28 @@ public class GameManager : MonoBehaviourPun
    public PlayerController GetPlayer(GameObject playerObject)
    {
       return players.First(x => x.gameObject == playerObject);
+   }
+
+   public void CheckWinCondition()
+   {
+      if (alivePlayers==1)
+      {
+         photonView.RPC("WinGame", RpcTarget.All, players.First(x=>!x.dead).id);
+      }
+   }
+
+   [PunRPC]
+   public void WinGame(int winningPlayer)
+   {
+      //Set the UI win Text
+      
+      
+      Invoke("GoBackToMenu", postGameTime);
+   }
+
+   void GoBackToMenu()
+   {
+      NetworkManager.Instance.ChangeScene("Menu");
+      
    }
 }

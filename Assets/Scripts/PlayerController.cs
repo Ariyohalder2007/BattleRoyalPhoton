@@ -109,8 +109,41 @@ public class PlayerController : MonoBehaviourPun
             photonView.RPC("Die", RpcTarget.All);
         }
     }
+
     [PunRPC]
-    public void Die(){}
+    public void Die()
+    {
+        curHp = 0;
+        dead = true;
+        GameManager.Instance.alivePlayers--;
+        if (PhotonNetwork.IsMasterClient)
+        {
+            GameManager.Instance.CheckWinCondition();
+        }
+
+        if (photonView.IsMine)
+        {
+            if (curAttackerId != 0)
+            {
+                GameManager.Instance.GetPlayer(curAttackerId).photonView.RPC("AddKill", RpcTarget.All);
+            }
+            
+            //Set the Cam to Spectator View
+            GetComponentInChildren<CameraController>().SetAsSpectator();
+            //Disable the physics and hide the player
+            rig.isKinematic = true;
+            transform.position = new Vector3(0, -50, 0);
+        }
+    }
+
+    [PunRPC]
+    void AddKill()
+    {
+        kills++;
+        //TODO: Update UI for kills
+        
+        
+    }
 
     [PunRPC]
     public void DamageFlash()
@@ -128,6 +161,15 @@ public class PlayerController : MonoBehaviourPun
             mr.material.color = defColor;
             flashingDamage = false;
         }
+    }
+
+    [PunRPC]
+    public void Heal(int amount)
+    {
+        curHp = Mathf.Clamp(curHp + amount, 0, maxHp);
+        //TODO: Update HealthBar
+        
+        
     }
 
 }

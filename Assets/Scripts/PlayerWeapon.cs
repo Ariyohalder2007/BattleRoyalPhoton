@@ -53,4 +53,13 @@ public class PlayerWeapon : MonoBehaviour
         
 
     }
+
+    [PunRPC]
+    public void GiveAmmo(int amount)
+    {
+        curAmmo = Mathf.Clamp(curAmmo + amount, 0, maxAmmo);
+        //Update the ammo text
+        
+        
+    }
 }
