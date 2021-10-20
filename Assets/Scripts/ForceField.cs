@@ -1,7 +1,5 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
-using Photon.Pun;
 using UnityEngine;
 
 public class ForceField : MonoBehaviour
@@ -10,72 +8,72 @@ public class ForceField : MonoBehaviour
     public float shrinkAmount;
     public float shrinkDuration;
     public float minShrinkAmount;
-    public int playerDamage;
 
+    public int playerDamage;
 
     private float lastShrinkEndTime;
     private bool shrinking;
     private float targetDiameter;
     private float lastPlayerCheckTime;
 
-    private void Start()
+    void Start ()
     {
         lastShrinkEndTime = Time.time;
         targetDiameter = transform.localScale.x;
-        
     }
 
-    private void Update()
+    void Update()
     {
-        if (shrinking)
+        // are we shrinking?
+        if(shrinking)
         {
-            transform.localScale=Vector3.MoveTowards(transform.localScale, Vector3.one * targetDiameter, (shrinkAmount/shrinkDuration)*Time.deltaTime);
-            if (transform.localScale.x == targetDiameter)
-            {
+            // shrink the scale to the target diameter
+            transform.localScale = Vector3.MoveTowards(transform.localScale, Vector3.one * targetDiameter, (shrinkAmount / shrinkDuration) * Time.deltaTime);
+
+            // are we at the target diameter?
+            if(transform.localScale.x == targetDiameter)
                 shrinking = false;
-            }
         }
         else
         {
-            // can We Shrink Again?
-            if (Time.time-lastShrinkEndTime>=shrinkWaitTime && transform.localScale.x > minShrinkAmount)
-            {
+            // can we shrink again?
+            if(Time.time - lastShrinkEndTime >= shrinkWaitTime && transform.localScale.x > minShrinkAmount)
                 Shrink();
-            }
         }
+
         CheckPlayers();
     }
 
-    void Shrink()
+    void Shrink ()
     {
         shrinking = true;
-        //Dont shrink below the min amount
-        if (transform.localScale.x - shrinkAmount > minShrinkAmount)
-        {
-            targetDiameter -= shrinkAmount;
-        }
-        else
-        {
-            targetDiameter = minShrinkAmount;
-        }
 
-        lastShrinkEndTime = Time.time  + shrinkDuration;
+        // make sure we don't shrink below the min amount
+        if(transform.localScale.x - shrinkAmount > minShrinkAmount)
+            targetDiameter -= shrinkAmount;
+        else
+            targetDiameter = minShrinkAmount;
+
+        lastShrinkEndTime = Time.time + shrinkDuration;
     }
 
-    void CheckPlayers()
+    void CheckPlayers ()
     {
-        if (Time.time-lastPlayerCheckTime>1f)
+        if(Time.time - lastPlayerCheckTime > 1.0f)
         {
             lastPlayerCheckTime = Time.time;
-            
-            
-            //loop through all the Players
 
-            foreach (PlayerController player in GameManager.Instance.players)
+            // loop through all players
+            foreach(PlayerController player in GameManager.Instance.players)
             {
-                if (player.dead || player==null) continue;
-                if (Vector3.Distance(Vector3.zero, player.transform.position)>=transform.localScale.x)
+                // if the player's dead, skip them
+                if(!player || player.dead)
+                    continue;
+
+                // are they outside the force field?
+                if(Vector3.Distance(Vector3.zero, player.transform.position) >= transform.localScale.x)
                 {
+                    // damage them
                     player.photonView.RPC("TakeDamage", player.photonPlayer, 0, playerDamage);
                 }
             }
