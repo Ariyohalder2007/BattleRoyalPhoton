@@ -15,11 +15,7 @@ public class NetworkManager : MonoBehaviourPunCallbacks
 
    private void Awake()
    {
-      // if (Instance != null)
-      // {
-      //    Destroy(gameObject);
-      //    return;
-      // }
+      
       Instance = this;
       DontDestroyOnLoad(gameObject);
    }
@@ -70,5 +66,20 @@ public class NetworkManager : MonoBehaviourPunCallbacks
    public void ChangeScene(string sceneName)
    {
       PhotonNetwork.LoadLevel(sceneName);
+   }
+
+   public override void OnDisconnected(DisconnectCause cause)
+   {
+      PhotonNetwork.LoadLevel("Menu");
+   }
+
+   public override void OnPlayerLeftRoom(Player otherPlayer)
+   {
+      GameManager.Instance.alivePlayers--;
+      GameUI.Instance.UpdatePlayerInfoText();
+      if (PhotonNetwork.IsMasterClient)
+      {
+         GameManager.Instance.CheckWinCondition();
+      }
    }
 }

@@ -55,12 +55,30 @@ public class GameManager : MonoBehaviourPun
 
    public PlayerController GetPlayer(int playerId)
    {
-      return players.First(x => x.id == playerId);
+      // return players.First(x => x.id == playerId);
+      foreach (var player in players)
+      {
+         if (player!=null&&player.id==playerId)
+         {
+            return player;
+         }
+      }
+
+      return null;
    }
 
    public PlayerController GetPlayer(GameObject playerObject)
    {
-      return players.First(x => x.gameObject == playerObject);
+      // return players.First(x => x.gameObject == playerObject);
+      foreach (var player in players)
+      {
+         if (player!=null&&player.gameObject==playerObject)
+         {
+            return player;
+         }
+      }
+
+      return null;
    }
 
    public void CheckWinCondition()
@@ -76,6 +94,8 @@ public class GameManager : MonoBehaviourPun
    {
       //Set the UI win Text
       
+      GameUI.Instance.SetWinText(GetPlayer(winningPlayer).photonPlayer.NickName);
+      
       
       Invoke("GoBackToMenu", postGameTime);
    }
@@ -83,6 +103,7 @@ public class GameManager : MonoBehaviourPun
    void GoBackToMenu()
    {
       NetworkManager.Instance.ChangeScene("Menu");
+      Destroy(NetworkManager.Instance.gameObject);
       
    }
 }

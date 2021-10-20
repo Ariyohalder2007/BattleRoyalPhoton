@@ -39,6 +39,10 @@ public class PlayerController : MonoBehaviourPun
             GetComponentInChildren<Camera>().gameObject.SetActive(false);
             rig.isKinematic = true;
         }
+        else
+        {
+            GameUI.Instance.Initialize(this);
+        }
     }
     
     
@@ -100,6 +104,7 @@ public class PlayerController : MonoBehaviourPun
         
         
         //Update the player UI
+        GameUI.Instance.UpdateHealthBar();
         
         
         //DIE if health == 0
@@ -140,8 +145,8 @@ public class PlayerController : MonoBehaviourPun
     void AddKill()
     {
         kills++;
-        //TODO: Update UI for kills
-        
+        // Update UI for kills
+        GameUI.Instance.UpdatePlayerInfoText();
         
     }
 
@@ -167,7 +172,8 @@ public class PlayerController : MonoBehaviourPun
     public void Heal(int amount)
     {
         curHp = Mathf.Clamp(curHp + amount, 0, maxHp);
-        //TODO: Update HealthBar
+        // Update HealthBar
+        GameUI.Instance.UpdateHealthBar();
         
         
     }
